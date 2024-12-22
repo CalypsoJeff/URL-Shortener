@@ -1,4 +1,4 @@
 const config = {
-    baseURL : "http://localhost:5000"
+    baseURL : "https://url-shortener-5rs6.onrender.com"
 }
 export default config
