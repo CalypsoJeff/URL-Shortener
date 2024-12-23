@@ -27,7 +27,15 @@ The application is deployed and accessible at:
 **[Deployed URL](https://url-shortener-seven-tan.vercel.app)**
 
 ---
+## AI-Assisted Development:
+This project utilized AI tools like ChatGPT, Claude.Ai and V0byVercel to enhance the development process:
 
+- Frontend UI Development: ChatGPT was instrumental in generating and improving the frontend UI components/pages.
+- Error Handling: AI assistance helped identify and resolve bugs more efficiently during the development process.
+- Understanding Nest.js: These tools provided valuable explanations and guidance, enabling a deeper understanding of Nest.js concepts and architecture.
+By leveraging these tools, the development speed and code quality were significantly improved, ensuring a smoother and more efficient workflow.
+
+---
 ## Prerequisites
 - Node.js installed on your local machine.
 - Git installed for version control.
