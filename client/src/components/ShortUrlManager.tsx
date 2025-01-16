@@ -18,12 +18,14 @@ interface JwtPayload {
 
 function ShortUrlManager() {
   const [shortenedList, setShortenedList] = useState<ShortenedUrl[]>([]);
+  const [filteredUrls, setFilteredUrls] = useState<ShortenedUrl[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [originalUrl, setOriginalUrl] = useState<string>("");
   const [latestShortUrl, setLatestShortUrl] = useState<ShortenedUrl | null>(
     null
   );
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     const fetchShortenedUrls = async () => {
@@ -41,6 +43,7 @@ function ShortUrlManager() {
           }
         );
         setShortenedList(response.data);
+        setFilteredUrls(response.data); // Initialize the filtered list
       } catch (err: any) {
         setError(
           err.response?.data?.message || "Failed to fetch shortened URLs"
@@ -52,6 +55,16 @@ function ShortUrlManager() {
 
     fetchShortenedUrls();
   }, []);
+
+  useEffect(() => {
+    // Filter URLs based on the search query
+    const filtered = shortenedList.filter(
+      (url) =>
+        url.originalUrl.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        url.shortId.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredUrls(filtered);
+  }, [searchQuery, shortenedList]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -115,56 +128,47 @@ function ShortUrlManager() {
             {error && <p className="text-red-500 text-sm">{error}</p>}
           </form>
 
-          {/* Latest Shortened URL Section with Fixed Width */}
+          {/* Latest Shortened URL Section */}
           {latestShortUrl && (
-            <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                  <FaLink className="text-blue-500 mr-2" />
-                  Latest Shortened URL
-                </h3>
-                <div className="space-y-3">
-                  <div className="bg-white p-3 rounded-lg shadow-sm overflow-hidden">
-                    <a
-                      href={`${config.baseURL}/shorten-url/${latestShortUrl.shortId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center group"
-                    >
-                      <span className="mr-2 flex-shrink-0">🔗</span>
-                      <span className="break-all">
-                        {config.baseURL}/shorten-url/{latestShortUrl.shortId}
-                      </span>
-                      <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                        ↗
-                      </span>
-                    </a>
-                  </div>
-                  <div className="bg-white p-3 rounded-lg shadow-sm">
-                    <span className="block text-gray-500 mb-1 text-xs uppercase font-medium">
-                      Original URL:
-                    </span>
-                    <span className="text-sm text-gray-600 break-all block">
-                      {latestShortUrl.originalUrl}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100 p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Latest Shortened URL
+              </h3>
+              <a
+                href={`${config.baseURL}/shorten-url/${latestShortUrl.shortId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline break-all"
+              >
+                {config.baseURL}/shorten-url/{latestShortUrl.shortId}
+              </a>
+              <p className="text-gray-600 break-all mt-1">
+                {latestShortUrl.originalUrl}
+              </p>
             </div>
           )}
         </div>
 
-        {/* Shortened URLs List */}
+        {/* Search and Shortened URLs List */}
         <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
           <h2 className="text-xl font-bold text-gray-800 p-4 border-b">
             Your Shortened URLs
           </h2>
+          <div className="p-4">
+            <input
+              type="text"
+              placeholder="Search URLs..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
           <div className="max-h-[400px] overflow-y-auto">
             {loading ? (
               <p className="p-4">Loading shortened URLs...</p>
-            ) : shortenedList.length > 0 ? (
+            ) : filteredUrls.length > 0 ? (
               <ul className="divide-y divide-gray-200">
-                {shortenedList.map((url) => (
+                {filteredUrls.map((url) => (
                   <li key={url.shortId} className="p-4">
                     <a
                       href={`${config.baseURL}/shorten-url/${url.shortId}`}
@@ -179,7 +183,7 @@ function ShortUrlManager() {
                 ))}
               </ul>
             ) : (
-              <p className="p-4">No shortened URLs found.</p>
+              <p className="p-4">No URLs match your search.</p>
             )}
           </div>
         </div>
