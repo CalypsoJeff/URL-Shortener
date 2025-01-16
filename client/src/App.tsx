@@ -14,7 +14,6 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/home" element={<Dashboard />} />
           <Route path="/" element={<LandingPage />} />
-
         </Routes>
       </BrowserRouter>
     </>

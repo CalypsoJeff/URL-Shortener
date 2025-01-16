@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import axios from "axios";
 import config from "../config";
@@ -22,7 +21,9 @@ function ShortUrlManager() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [originalUrl, setOriginalUrl] = useState<string>("");
-  const [latestShortUrl, setLatestShortUrl] = useState<ShortenedUrl | null>(null);
+  const [latestShortUrl, setLatestShortUrl] = useState<ShortenedUrl | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchShortenedUrls = async () => {
@@ -87,7 +88,9 @@ function ShortUrlManager() {
         <div className="w-full bg-white rounded-lg shadow-md p-6">
           <div className="flex flex-col items-center mb-4">
             <FaLink className="text-blue-500 text-3xl mb-2" />
-            <h2 className="text-2xl font-bold text-gray-800">Shorten Your URL</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Shorten Your URL
+            </h2>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -111,18 +114,42 @@ function ShortUrlManager() {
             </button>
             {error && <p className="text-red-500 text-sm">{error}</p>}
           </form>
+
+          {/* Latest Shortened URL Section with Fixed Width */}
           {latestShortUrl && (
-            <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-              <h3 className="text-lg font-semibold">Latest Shortened URL:</h3>
-              <a
-                href={`${config.baseURL}/shorten-url/${latestShortUrl.shortId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline break-all"
-              >
-                {config.baseURL}/shorten-url/{latestShortUrl.shortId}
-              </a>
-              <p className="text-gray-600">{latestShortUrl.originalUrl}</p>
+            <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                  <FaLink className="text-blue-500 mr-2" />
+                  Latest Shortened URL
+                </h3>
+                <div className="space-y-3">
+                  <div className="bg-white p-3 rounded-lg shadow-sm overflow-hidden">
+                    <a
+                      href={`${config.baseURL}/shorten-url/${latestShortUrl.shortId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center group"
+                    >
+                      <span className="mr-2 flex-shrink-0">🔗</span>
+                      <span className="break-all">
+                        {config.baseURL}/shorten-url/{latestShortUrl.shortId}
+                      </span>
+                      <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                        ↗
+                      </span>
+                    </a>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg shadow-sm">
+                    <span className="block text-gray-500 mb-1 text-xs uppercase font-medium">
+                      Original URL:
+                    </span>
+                    <span className="text-sm text-gray-600 break-all block">
+                      {latestShortUrl.originalUrl}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

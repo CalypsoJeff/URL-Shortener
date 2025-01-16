@@ -48,7 +48,6 @@ const RegisterForm: React.FC = () => {
         email: formData.email,
         password: formData.password,
       });
-      console.log(response.data, "@@@@@@@@@");
 
       if (response.status === 201) {
         // Show toast notification before navigating
