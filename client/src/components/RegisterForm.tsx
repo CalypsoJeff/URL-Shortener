@@ -29,23 +29,44 @@ const RegisterForm: React.FC = () => {
   const [apiError, setApiError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const validateUsername = (username: string) => {
+    const usernameRegex = /^[a-zA-Z0-9]{3,20}$/;
+    return usernameRegex.test(username);
+  };
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
   const validatePassword = (password: string) => {
-    return password.length >= 6;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
 
     // Dynamic validations
+    if (name === "username" && !validateUsername(value)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        username:
+          "Username must be 3-20 characters long and contain only letters and numbers.",
+      }));
+    } else if (name === "username") {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        username: undefined,
+      }));
+    }
+
     if (name === "email" && !validateEmail(value)) {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -61,7 +82,8 @@ const RegisterForm: React.FC = () => {
     if (name === "password" && !validatePassword(value)) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        password: "Password must be at least 6 characters long.",
+        password:
+          "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.",
       }));
     } else if (name === "password") {
       setErrors((prevErrors) => ({
@@ -87,10 +109,11 @@ const RegisterForm: React.FC = () => {
     e.preventDefault();
 
     // Final validation
-    if (!formData.username) {
+    if (!validateUsername(formData.username)) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        username: "Username is required.",
+        username:
+          "Username must be 3-20 characters long and contain only letters and numbers.",
       }));
       return;
     }
@@ -104,7 +127,8 @@ const RegisterForm: React.FC = () => {
     if (!validatePassword(formData.password)) {
       setErrors((prevErrors) => ({
         ...prevErrors,
-        password: "Password must be at least 6 characters long.",
+        password:
+          "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character.",
       }));
       return;
     }
@@ -126,7 +150,7 @@ const RegisterForm: React.FC = () => {
       if (response.status === 201) {
         toast.success("Registration successful!", {
           onClose: () => {
-            navigate("/login"); // Redirect to login page after toast is dismissed
+            navigate("/login");
           },
         });
       } else {
