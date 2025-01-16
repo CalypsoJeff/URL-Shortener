@@ -11,19 +11,76 @@ const SignInPage: React.FC = () => {
     email: "",
     password: "",
   });
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({
+    email: "",
+    password: "",
+  });
+  const [apiError, setApiError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
+
+    // Validate input fields dynamically
+    if (name === "email" && !validateEmail(value)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        email: "Please enter a valid email address.",
+      }));
+    } else if (name === "email") {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        email: "",
+      }));
+    }
+
+    if (name === "password" && !validatePassword(value)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        password: "Password must be at least 6 characters.",
+      }));
+    } else if (name === "password") {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        password: "",
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null); // Clear previous errors
+    setApiError(null); // Clear previous API errors
+
+    // Final validation before submission
+    if (!validateEmail(formData.email)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        email: "Please enter a valid email address.",
+      }));
+      return;
+    }
+    if (!validatePassword(formData.password)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        password: "Password must be at least 6 characters.",
+      }));
+      return;
+    }
+
     try {
       const response = await axios.post(`${config.baseURL}/auth/login`, {
         email: formData.email,
@@ -37,14 +94,13 @@ const SignInPage: React.FC = () => {
       if (axios.isAxiosError(err)) {
         const errorMessage =
           err.response?.data?.message || "An error occurred.";
-        setError(errorMessage);
+        setApiError(errorMessage);
         toast.error(errorMessage);
       } else {
-        setError("An unknown error occurred.");
+        setApiError("An unknown error occurred.");
         toast.error("An unknown error occurred.");
       }
     }
-    console.log("Form submitted:", formData);
   };
 
   return (
@@ -57,7 +113,6 @@ const SignInPage: React.FC = () => {
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <input type="hidden" name="remember" value="true" />
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email-address" className="sr-only">
@@ -69,11 +124,18 @@ const SignInPage: React.FC = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
+                  errors.email
+                    ? "border-red-500"
+                    : "border-gray-300 focus:border-indigo-500"
+                } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:z-10 sm:text-sm`}
                 placeholder="Email address"
                 value={formData.email}
                 onChange={handleChange}
               />
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              )}
             </div>
             <div>
               <label htmlFor="password" className="sr-only">
@@ -85,15 +147,24 @@ const SignInPage: React.FC = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
+                  errors.password
+                    ? "border-red-500"
+                    : "border-gray-300 focus:border-indigo-500"
+                } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:z-10 sm:text-sm`}
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
               />
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+              )}
             </div>
           </div>
 
-          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+          {apiError && (
+            <div className="text-red-500 text-sm mt-2">{apiError}</div>
+          )}
 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
